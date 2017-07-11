@@ -27,6 +27,27 @@ class Users extends CI_Controller {
         $CI->load->model('users_model');
     }
 
+            
+    /*
+     * User account information
+     */
+    public function index(){
+        $data = array();
+        if($this->session->userdata('isUserLoggedIn')){
+            $data['user'] = $this->users_model->getRows(array('id'=>$this->session->userdata('userId')));
+            //$roleID = $user['role_id'];
+            //$data['user_role'] = $this->users_model->getRole(array('role_id'=>$this->session->userdata('userId')));
+            //load the view
+
+            $role = $this->session->userdata('userRole');
+                                            
+            $this->user_control($role);
+
+        }else{
+            redirect('users/login');
+        }
+    }
+
     
     /*
      * User login
@@ -55,40 +76,10 @@ class Users extends CI_Controller {
                 if($checkLogin){
                     $this->session->set_userdata('isUserLoggedIn',TRUE);
                     $this->session->set_userdata('userId',$checkLogin['id']);
-                    $this->session->set_userdata('userId',$checkLogin['role_id']);
+                    $this->session->set_userdata('userRole',$checkLogin['role_id']);
                     $role = $checkLogin['role_id'];
-                    $this->load->helper('url');
-                    
-                    //redirect('users/account');
+                    $this->user_control($role);
 
-                                
-                switch ($role) {
-
-                case 1:
-                    //system admin
-                    redirect('sys_admin');
-                    break;
-                case 2:
-                    //admin user
-                    redirect('admin');
-                    break;
-                case 3:
-                    //ABI
-                    redirect('investor');
-                    break;
-                case 4:
-                    //AIS/AV
-                    redirect('supplier', 'refresh');
-                    break;
-                case 5:
-                    //AESP
-                    redirect('worker', 'refresh');
-                    break;
-            
-                default:
-                    $this->load->view('users/login');
-            }
-            
                 }else{
                     $data['error_msg'] = 'Wrong email or password, please try again.';
                 }
@@ -133,6 +124,43 @@ class Users extends CI_Controller {
         //load the view
         $this->load->view('users/registration', $data);
     }
+
+    /*
+     * User controller redirect
+     */
+     public function user_control($role){
+                                              
+                switch ($role) {
+
+                case 1:
+                    //system admin
+                    redirect('sys_admin');
+                    break;
+                case 2:
+                    //admin user
+                    redirect('admin');
+                    break;
+                case 3:
+                    //ABI
+                    redirect('investor');
+                    break;
+                case 4:
+                    //AIS/AV
+                    redirect('supplier');
+                    break;
+                case 5:
+                    //AESP
+                    redirect('worker');
+                    break;
+            
+                default:
+                    $this->load->view('users/login');
+            }
+
+            return;
+            
+     }
+
     
     /*
      * User logout
